@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ACC Live Dashboard</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #151d2d;
+        --panel-2: #1f2c42;
+        --text: #e6eefc;
+        --muted: #a9b7d3;
+        --accent: #4cc9f0;
+        --good: #38d39f;
+        --warn: #ffb703;
+        --danger: #ff5d73;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 24px auto;
+        padding: 16px;
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--panel);
+        border: 1px solid #2a3a59;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 18px;
+      }
+      .title {
+        font-size: 1.7rem;
+        font-weight: bold;
+      }
+      .badge {
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-weight: bold;
+        font-size: 0.8rem;
+      }
+      .badge.ok { background: rgba(56, 211, 159, 0.18); color: var(--good); }
+      .badge.warn { background: rgba(255, 183, 3, 0.18); color: var(--warn); }
+      .badge.danger { background: rgba(255, 93, 115, 0.18); color: var(--danger); }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid #2a3a59;
+        border-radius: 10px;
+        padding: 16px;
+      }
+      .label {
+        color: var(--muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+      }
+      .value {
+        font-size: 2rem;
+        font-weight: bold;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 18px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid #2a3a59;
+        border-radius: 10px;
+        padding: 16px;
+      }
+      .panel h3 {
+        margin: 0 0 12px 0;
+        font-size: 1rem;
+      }
+      .bars {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .bar-row {
+        display: grid;
+        grid-template-columns: 50px 1fr 52px;
+        gap: 10px;
+        align-items: center;
+      }
+      .bar-track {
+        height: 16px;
+        border-radius: 999px;
+        background: #0c1220;
+        border: 1px solid #2a3a59;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--accent), var(--good));
+      }
+      .bar-fill.warn { background: linear-gradient(90deg, #ef476f, var(--warn)); }
+      .events {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .events li {
+        border-top: 1px solid #2a3a59;
+        padding-top: 8px;
+        margin-top: 8px;
+        color: var(--muted);
+      }
+      .small {
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+      @media (max-width: 800px) {
+        .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="topbar">
+        <div>
+          <div class="small">ACC LIVE SYSTEM</div>
+          <div class="title">Adaptive Cruise Control</div>
+        </div>
+        <div id="modeBadge" class="badge ok">RUNNING</div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="label">Ego Speed</div>
+          <div id="egoSpeed" class="value">0.0</div>
+          <div class="small">m/s</div>
+        </div>
+        <div class="card">
+          <div class="label">Lead Speed</div>
+          <div id="leadSpeed" class="value">0.0</div>
+          <div class="small">m/s</div>
+        </div>
+        <div class="card">
+          <div class="label">Gap</div>
+          <div id="gap" class="value">0.0</div>
+          <div class="small">m</div>
+        </div>
+        <div class="card">
+          <div class="label">TTC</div>
+          <div id="ttc" class="value">0.0</div>
+          <div class="small">s</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Control Demand</h3>
+          <div class="bars">
+            <div class="bar-row">
+              <div>THR</div>
+              <div class="bar-track"><div id="throttleBar" class="bar-fill" style="width: 0%"></div></div>
+              <div id="throttlePct">0%</div>
+            </div>
+            <div class="bar-row">
+              <div>BRK</div>
+              <div class="bar-track"><div id="brakeBar" class="bar-fill warn" style="width: 0%"></div></div>
+              <div id="brakePct">0%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Safety Status</h3>
+          <div class="small">Mode</div>
+          <div id="modeValue" class="value" style="font-size:1.5rem; margin-bottom:12px;">OFF</div>
+          <div class="small">Fault Flags</div>
+          <div id="faultFlags" class="value" style="font-size:1.5rem; margin-bottom:12px;">0</div>
+          <div class="small">Warn Level</div>
+          <div id="warnLevel" class="value" style="font-size:1.5rem;">0</div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <h3>Recent Safety Events</h3>
+        <ul id="events" class="events"></ul>
+      </div>
+    </div>
+
+    <script>
+      const modeBadge = document.getElementById('modeBadge');
+      const egoSpeed = document.getElementById('egoSpeed');
+      const leadSpeed = document.getElementById('leadSpeed');
+      const gap = document.getElementById('gap');
+      const ttc = document.getElementById('ttc');
+      const throttleBar = document.getElementById('throttleBar');
+      const brakeBar = document.getElementById('brakeBar');
+      const throttlePct = document.getElementById('throttlePct');
+      const brakePct = document.getElementById('brakePct');
+      const modeValue = document.getElementById('modeValue');
+      const faultFlags = document.getElementById('faultFlags');
+      const warnLevel = document.getElementById('warnLevel');
+      const eventsList = document.getElementById('events');
+
+      async function update() {
+        try {
+          const res = await fetch('/api/status');
+          const data = await res.json();
+
+          egoSpeed.textContent = Number(data.ego_speed_mps).toFixed(1);
+          leadSpeed.textContent = Number(data.lead_speed_mps).toFixed(1);
+          gap.textContent = Number(data.gap_m).toFixed(1);
+          ttc.textContent = Number(data.ttc_s).toFixed(1);
+          throttlePct.textContent = `${Number(data.throttle_pct).toFixed(0)}%`;
+          brakePct.textContent = `${Number(data.brake_pct).toFixed(0)}%`;
+          modeValue.textContent = data.mode;
+          faultFlags.textContent = data.fault_flags;
+          warnLevel.textContent = data.warn_level;
+
+          const throttle = Math.min(Math.max(Number(data.throttle_pct), 0), 100);
+          const brake = Math.min(Math.max(Number(data.brake_pct), 0), 100);
+          throttleBar.style.width = `${throttle}%`;
+          brakeBar.style.width = `${brake}%`;
+
+          if (data.mode === 'FAULT' || data.warn_level >= 2) {
+            modeBadge.textContent = 'FAULT';
+            modeBadge.className = 'badge danger';
+          } else if (data.mode === 'EMERGENCY' || data.warn_level === 1) {
+            modeBadge.textContent = 'WARNING';
+            modeBadge.className = 'badge warn';
+          } else {
+            modeBadge.textContent = data.mode;
+            modeBadge.className = 'badge ok';
+          }
+
+          const eventsRes = await fetch('/api/events');
+          const eventsData = await eventsRes.json();
+          const items = (eventsData.events || []).slice(-6);
+          eventsList.innerHTML = items.length ? items.map((e) => `<li>${e.text}</li>`).join('') : '<li>No safety events yet.</li>';
+        } catch (err) {
+          eventsList.innerHTML = '<li>Waiting for live ACC data...</li>';
+        }
+      }
+
+      update();
+      setInterval(update, 1000);
+    </script>
+  </body>
+</html>
