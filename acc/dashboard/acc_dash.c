@@ -114,7 +114,7 @@ static void print_dashboard(int scenario)
     }
 
     ncols = split_csv_line(line, cols, 20);
-    if (ncols < 12) {
+    if (ncols < 13) {
         printf("Trace format not ready yet.\n");
         printf("Last line: %s\n", line);
         printf("===========================================================\n");
@@ -130,15 +130,19 @@ static void print_dashboard(int scenario)
     double a_ego = atof(cols[6]);
     double throttle = atof(cols[7]);
     double brake = atof(cols[8]);
-    int fault = atoi(cols[9]);
-    int warn = atoi(cols[10]);
-    double ttc = atof(cols[11]);
+    const char *mode = cols[9];
+    int fault = atoi(cols[10]);
+    int warn = atoi(cols[11]);
+    double ttc = atof(cols[12]);
+
+    double throttle_pct = (throttle < 0.0 ? 0.0 : (throttle > 1.0 ? 1.0 : throttle)) * 100.0;
+    double brake_pct = (brake < 0.0 ? 0.0 : (brake > 1.0 ? 1.0 : brake)) * 100.0;
 
     printf("Time: %6.1f s   Scenario: %d   Faults: 0x%02x\n", t, scenario, fault);
+    printf("Mode: %-10s   Warn Level: %d\n", mode, warn);
     printf("Ego Speed: %6.1f m/s   Lead: %6.1f m/s   Gap: %6.1f m\n", v_ego, v_lead, gap);
     printf("Desired Gap: %6.1f m   TTC: %5.1f s   Tau: %4.2f s\n", d_des, ttc, tau);
-    printf("Accel: %6.2f m/s^2   Throttle: %5.1f%%   Brake: %5.1f%%\n", a_ego, throttle, brake);
-    printf("Warn Level: %d\n", warn);
+    printf("Accel: %6.2f m/s^2   Throttle: %5.1f%%   Brake: %5.1f%%\n", a_ego, throttle_pct, brake_pct);
     printf("-----------------------------------------------------------\n");
     print_last_safety_lines(scenario);
     printf("===========================================================\n");

@@ -84,10 +84,13 @@ def build_dashboard(scenario: int):
     if ttc < 0:
         ttc = -1.0
 
+    throttle_pct = min(max(throttle, 0.0), 1.0) * 100.0
+    brake_pct = min(max(brake, 0.0), 1.0) * 100.0
+
     safety_text = safety_lines[-2:] if safety_lines else ["No safety events yet"]
     bars = {
-        "throttle": min(max(int(throttle * 1.5), 0), 100),
-        "brake": min(max(int(brake * 1.5), 0), 100),
+        "throttle": min(max(int(throttle_pct), 0), 100),
+        "brake": min(max(int(brake_pct), 0), 100),
     }
 
     throttle_bar = "#" * bars["throttle"] + " " * (100 - bars["throttle"])
@@ -100,11 +103,11 @@ def build_dashboard(scenario: int):
     lines.append(f"Time: {t:6.1f}s    Scenario: {scenario}    Mode: {mode:<10}    Faults: 0x{fault:02x}")
     lines.append(f"Ego Speed: {v_ego:6.1f} m/s   Lead Speed: {v_lead:6.1f} m/s   Gap: {gap:6.1f} m")
     lines.append(f"Desired Gap: {d_des:6.1f} m   TTC: {ttc:5.1f}s   Tau: {tau:4.2f}s")
-    lines.append(f"Throttle: {throttle:5.1f}%   Brake: {brake:5.1f}%   Warn Level: {warn}")
+    lines.append(f"Throttle: {throttle_pct:5.1f}%   Brake: {brake_pct:5.1f}%   Warn Level: {warn}")
     lines.append("")
     lines.append("Pedal demand")
-    lines.append(f"THR  [{throttle_bar[:100]}] {throttle:5.1f}%")
-    lines.append(f"BRK  [{brake_bar[:100]}] {brake:5.1f}%")
+    lines.append(f"THR  [{throttle_bar[:100]}] {throttle_pct:5.1f}%")
+    lines.append(f"BRK  [{brake_bar[:100]}] {brake_pct:5.1f}%")
     lines.append("")
     lines.append("Safety")
     for entry in safety_text:

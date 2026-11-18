@@ -4,7 +4,7 @@
 #   ./scripts/run_acc.sh <scenario 1..5> [duration_s] [hog]
 #
 #   1 lead_brake  2 cut_in  3 stop_go  4 sensor_drop  5 ctrl_hang
-#   "hog" adds two CPU-hog processes at priority 35 as a stress test.
+#   "hog" adds two CPU-hog processes at priority 9 as a stress test.
 #
 # Results land in logs/s<scenario>/ :
 #   sim_summary.txt   safety and comfort numbers (gap, decel, jerk, collision)
